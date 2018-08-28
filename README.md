@@ -3,13 +3,9 @@
 This packages helps you writing JSON decoders in a [Continuation-passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
 This is useful when decoding JSON objects to Elm records.
 
-The traditional approach would be to use `Json.Decode.mapX` to build records.
-Something like this:
+Let's say you have a `Person` record looking like this:
 
 ```elm
-
-import Json.Decode as Json exposing (Decoder)
-
 type alias Person =
     { id : Int -- Field is mandatory, decoder should fail if field is missing in the JSON object
     , name : String -- Field is mandatory
@@ -17,7 +13,11 @@ type alias Person =
     , likes : Int -- Should default to 0 if JSON field is missing or null
     , hardcoded : String -- Should be hardcoded to "Hardcoded Value"
     }
+```
+The traditional approach would be to use `Json.Decode.mapX` to build records.
 
+```elm
+import Json.Decode as Json exposing (Decoder)
 
 person : Decoder Person
 person =
@@ -34,6 +34,7 @@ person =
 
 Using this package you can write the same decoder like this:
 ```elm
+import Json.Decode as Json exposing (Decoder)
 import Json.Decode.Field as Field
 
 person : Decoder Person
