@@ -25,7 +25,8 @@ person =
         (Json.field "id" Json.int)
         (Json.field "name" Json.string)
         (Json.maybe <| Json.field "weight" Json.int)
-        (Json.maybe (Json.field "likes" Json.int)
+        (Json.field "likes" Json.int
+            |> Json.maybe
             |> Json.map (Maybe.withDefault 0)
         )
         (Json.succeed "Hardcoded Value")
