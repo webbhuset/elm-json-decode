@@ -62,6 +62,7 @@ The main advantages over using `mapX` are:
 * Easier to add fields down the line.
 * If all fields of the record has the same type you won't get any compiler error with the `map` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
 * Sometimes fields needs futher validation / processing. See below examples.
+* If you have more than 8 fields in your object you can't use `Json.Decode.mapX`.
 
 ## More Examples
 
