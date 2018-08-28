@@ -1,4 +1,4 @@
-# JSON Decoder, continuation-passing style
+# Continuation-passing style Json decoder in Elm
 
 This packages helps you writing JSON decoders in a [Continuation-passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
 This is useful when decoding JSON objects to Elm records.
