@@ -3,6 +3,8 @@
 This packages helps you writing JSON decoders in a [Continuation-passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
 This is useful when decoding JSON objects to Elm records.
 
+## Example
+
 Let's say you have a `Person` record looking like this:
 
 ```elm
@@ -59,10 +61,55 @@ The main advantages over using `mapX` are:
 * Easier to see how the record is connected to the JSON object. Especially when there are many fields. Sometimes the JSON fields have different names than your Elm record.
 * Easier to add fields down the line.
 * If all fields of the record has the same type you won't get any compiler error with the `map` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
+* Sometimes fields needs futher validation / processing. This be done in a clear way with continuation.
+
+## More Examples
+
+### Combine fields
+
+```elm
+
+type alias Person =
+    { name : String
+    , age : Int
+    }
+    
+person : Decoder Person
+person =
+    Field.required "firstname" Json.string (\firstname ->
+    Field.required "lastname" Json.string (\lastname ->
+    Field.required "age" Json.int (\int ->
+        Json.succeed
+            { name = firstname ++ " " ++ lastname
+            , age = age
+            }
+    )))
+```
+
+### Fail decoder if values are invalid
+
+```elm
+type alias Person =
+    { name : String
+    , age : Int
+    }
+    
+person : Decoder Person
+person =
+    Field.required "name" Json.string (\name ->
+    Field.required "age" Json.int (\int ->
+        if age < 18 then
+            Json.fail "You must be an adult"
+        else
+            Json.succeed
+                { name = name
+                , age = age
+                }
+    ))
+```
 
 
-
-## What is going on?
+## How does this work?
 
 Consider this simple example:
 
@@ -164,47 +211,3 @@ bind each field to a variable. Keeping the field decoder and the variable on the
 easy to read.
 Then you build the record using all collected values.
 
-## Examples
-
-### Combine fields
-
-```elm
-
-type alias Person =
-    { name : String
-    , age : Int
-    }
-    
-person : Decoder Person
-person =
-    Field.required "firstname" Json.string (\firstname ->
-    Field.required "lastname" Json.string (\lastname ->
-    Field.required "age" Json.int (\int ->
-        Json.succeed
-            { name = firstname ++ " " ++ lastname
-            , age = age
-            }
-    ))
-```
-
-### Fail if values are not valid
-
-```elm
-type alias Person =
-    { name : String
-    , age : Int
-    }
-    
-person : Decoder Person
-person =
-    Field.required "name" Json.string (\name ->
-    Field.required "age" Json.int (\int ->
-        if age < 18 then
-            Json.fail "You must be an adult"
-        else
-            Json.succeed
-                { name = name
-                , age = age
-                }
-    ))
-```
