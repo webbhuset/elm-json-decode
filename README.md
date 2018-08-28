@@ -61,11 +61,13 @@ The main advantages over using `mapX` are:
 * Easier to see how the record is connected to the JSON object. Especially when there are many fields. Sometimes the JSON fields have different names than your Elm record.
 * Easier to add fields down the line.
 * If all fields of the record has the same type you won't get any compiler error with the `map` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
-* Sometimes fields needs futher validation / processing. This be done in a clear way with continuation.
+* Sometimes fields needs futher validation / processing. See below examples.
 
 ## More Examples
 
 ### Combine fields
+
+In this example the JSON object contains both `firstname` and `lastname`, but the Elm record only has `name`.
 
 ```elm
 
@@ -87,6 +89,8 @@ person =
 ```
 
 ### Fail decoder if values are invalid
+
+Here, the decoder should fail if the person is below 18.
 
 ```elm
 type alias Person =
