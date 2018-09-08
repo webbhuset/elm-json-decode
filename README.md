@@ -102,7 +102,8 @@ person =
 
 ### Nested JSON objects
 
-Using `requiredAt` or `optionalAt` you can reach down into nested objects.
+Using `requiredAt` or `optionalAt` you can reach down into nested objects. This is a
+common use case when decoding graphQL responses.
 
 **JSON**
 ```json
