@@ -82,7 +82,7 @@ person : Decoder Person
 person =
     Field.required "firstname" Json.string (\firstname ->
     Field.required "lastname" Json.string (\lastname ->
-    Field.required "age" Json.int (\int ->
+    Field.required "age" Json.int (\age ->
         Json.succeed
             { name = firstname ++ " " ++ lastname
             , age = age
@@ -103,7 +103,7 @@ type alias Person =
 person : Decoder Person
 person =
     Field.required "name" Json.string (\name ->
-    Field.required "age" Json.int (\int ->
+    Field.required "age" Json.int (\age ->
         if age < 18 then
             Json.fail "You must be an adult"
         else
@@ -114,6 +114,25 @@ person =
     ))
 ```
 
+### Custom types
+
+You can also use this package to build decoders for custom types.
+
+```elm
+type User
+    = Anonymous
+    | Registered String
+
+user : Decoder User
+user =
+    Field.optional "name" Json.string (\maybeName ->
+        case maybeName of
+            Just name ->
+                Json.succeed <| Registered name
+            Nothing ->
+                Json.succeed Anonymous
+    )
+```
 
 ## How does this work?
 
