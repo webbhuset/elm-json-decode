@@ -175,20 +175,30 @@ person =
 
 You can also use this package to build decoders for custom types.
 
+**JSON**
+```json
+{
+    "name": "John Doe",
+    "id": 42
+}
+```
+**Elm**
 ```elm
 type User
     = Anonymous
-    | Registered String
+    | Registered Int String
 
 user : Decoder User
 user =
+    Field.optional "id" Json.int (\maybeID ->
     Field.optional "name" Json.string (\maybeName ->
-        case maybeName of
-            Just name ->
-                Json.succeed <| Registered name
-            Nothing ->
+        case (maybeID, maybeName) of
+            (Just name, Just id) ->
+                Registered id name
+                    |> Json.succeed
+            _ ->
                 Json.succeed Anonymous
-    )
+    ))
 ```
 
 ## How does this work?
