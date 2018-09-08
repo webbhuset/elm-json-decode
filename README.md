@@ -17,7 +17,7 @@ type alias Person =
     , hardcoded : String -- Should be hardcoded to "Hardcoded Value" for now
     }
 ```
-The approach suggested by the core JSON library is to use the `Json.Decode.mapX` family of decoders to build
+The approach [suggested by the core JSON library](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map3) is to use the `Json.Decode.mapX` family of decoders to build
 a record.
 
 ```elm
@@ -64,7 +64,7 @@ The main advantages over using `mapX` are:
 * Easier to add fields down the line.
 * If all fields of the record are of the same type you won't get any compiler error with the `mapX` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
 * Sometimes fields needs futher validation / processing. See below examples.
-* If you have more than 8 fields in your object you can't use the `Json.Decode.mapX` approach since `map8` is the largest map function.
+* If you have more than 8 fields in your object you can't use the `Json.Decode.mapX` approach since [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
 
 ## More Examples
 
@@ -211,7 +211,7 @@ user =
         (Json.field "name" Json.string)
 ```
 
-Here, `map2` from elm/json is used to decode a JSON object to a record.
+Here, `map2` from [elm/json](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map2) is used to decode a JSON object to a record.
 The record constructor function is used (`User : Int -> String -> User`) to build the record.
 This means that the order fields are written in the type declaration matters. If you
 change the order of fields `id` and `name` in yor record, you have to change the order of the two 
