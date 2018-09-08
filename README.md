@@ -72,6 +72,15 @@ The main advantages over using `mapX` are:
 
 In this example the JSON object contains both `firstname` and `lastname`, but the Elm record only has `name`.
 
+**JSON**
+```json
+{
+    "firstname": "John",
+    "lastname": "Doe",
+    "age": 42
+}
+```
+**Elm**
 ```elm
 
 type alias Person =
@@ -91,10 +100,55 @@ person =
     )))
 ```
 
+### Nested JSON objects
+
+Using `requiredAt` or `optionalAt` you can reach down into nested objects.
+
+**JSON**
+```json
+{
+    "id": 321,
+    "title": "About JSON decoders",
+    "author": {
+        "id": 123,
+        "name": "John Doe",
+    },
+    "content": "..."
+}
+```
+**Elm**
+```elm
+
+type alias BlogPost =
+    { title : String
+    , author : String
+    , content : String
+    }
+    
+blogpost : Decoder BlogPost
+blogpost =
+    Field.required "title" Json.string (\title ->
+    Field.requiredAt ["author", "name"] Json.string (\authorName ->
+    Field.required "content" Json.string (\content ->
+        Json.succeed
+            { title = title
+            , author = authorName
+            , content = content
+            }
+    )))
+```
+
 ### Fail decoder if values are invalid
 
 Here, the decoder should fail if the person is below 18.
-
+**JSON**
+```json
+{
+    "name": "John Doe",
+    "age": 42
+}
+```
+**Elm**
 ```elm
 type alias Person =
     { name : String
