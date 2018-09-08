@@ -142,6 +142,7 @@ blogpost =
 ### Fail decoder if values are invalid
 
 Here, the decoder should fail if the person is below 18.
+
 **JSON**
 ```json
 {
