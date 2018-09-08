@@ -193,7 +193,7 @@ user =
     Field.optional "id" Json.int (\maybeID ->
     Field.optional "name" Json.string (\maybeName ->
         case (maybeID, maybeName) of
-            (Just name, Just id) ->
+            (Just id, Just name) ->
                 Registered id name
                     |> Json.succeed
             _ ->
