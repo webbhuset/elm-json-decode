@@ -1,7 +1,8 @@
 # Continuation-passing style Json decoder in Elm
 
 This packages helps you writing JSON decoders in a [Continuation-passing](https://en.wikipedia.org/wiki/Continuation-passing_style) style.
-This is useful when decoding JSON objects to Elm records.
+This enables you use named bindings for field names which is very useful when
+decoding JSON objects to Elm records or custom types.
 
 ## Example
 
