@@ -232,8 +232,8 @@ user =
 ```
 This reads quite nice.
 
-First you extract everything you need from the JSON object and
+* First you extract everything you need from the JSON object and
 bind each field to a variable. Keeping the field decoder and the variable on the same row makes it
 easy to read.
-Then you build the record using all collected values.
+* Then you build the record using all collected values.
 
