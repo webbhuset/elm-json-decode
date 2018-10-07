@@ -1,74 +1,73 @@
-module Json.Decode.Field exposing (..)
+module Json.Decode.Field exposing (require, requireAt, attemt, attemtAt)
 
 {-| Decode with continuation
 
-@docs required, requiredAt, optional, optionalAt
+@docs require, requireAt, attempt, attemptAt
 
 -}
 
 import Json.Decode as Decode exposing (Decoder)
 
 
-{-| Decode required fields.
+{-| Decode required fields. The decoder will fail if the field
+is missing or its value can not be decoded.
 
     user : Decoder User
     user =
-        required "id" Json.int (\id ->
-        required "name" Json.string (\name ->
-            Json.succeed
-                { id = id
-                , name = name
-                }
-        ))
+        require "id" Decode.int <| \id ->
+        require "name" Decode.string <| \name ->
+        Decode.succeed
+            { id = id
+            , name = name
+            }
 -}
-required : String -> Decoder a -> (a -> Decoder b) -> Decoder b
-required fieldName valueDecoder continuation =
+require : String -> Decoder a -> (a -> Decoder b) -> Decoder b
+require fieldName valueDecoder continuation =
     Decode.field fieldName valueDecoder
         |> Decode.andThen continuation
 
 
-{-| Decode required nested fields.
+{-| Decode require nested fields.
 
     blogPost : Decoder BlogPost
     blogPost =
-        required "id" Json.int (\id ->
-        required "title" Json.string (\title ->
-        requiredAt ["author, "name"] Json.string (\authorName ->
-            Json.succeed
-                { id = id
-                , title = title
-                , author = authorName
-                }
-        )))
+        require "id" Decode.int <| \id ->
+        require "title" Decode.string <| \title ->
+        requireAt ["author, "name"] Decode.string <| \authorName ->
+        Decode.succeed
+            { id = id
+            , title = title
+            , author = authorName
+            }
 -}
-requiredAt : List String -> Decoder a -> (a -> Decoder b) -> Decoder b
-requiredAt path valueDecoder continuation =
+requireAt : List String -> Decoder a -> (a -> Decoder b) -> Decoder b
+requireAt path valueDecoder continuation =
     Decode.at path valueDecoder
         |> Decode.andThen continuation
 
 
 {-| Decode optional fields.
 
-The decoder will not fail if the value is missing or null. The decoded
-value will be `Nothing` if the field is missing or has value `null`.
+The decoder will not fail if the field is missing or its value can no be
+decoded. The decoded value will be `Nothing` if the field is missing or the
+value decoder fails.
 
     person : Decoder Person
     person =
-        required "name" Json.string (\name ->
-        optional "weight" Json.int (\maybeWeight ->
-            Json.succeed
-                { name = name
-                , weight = maybeWeight
-                }
-        ))
+        require "name" Decode.string <| \name ->
+        attempt "weight" Decode.int <| \maybeWeight ->
+        Decode.succeed
+            { name = name
+            , weight = maybeWeight
+            }
 
-If a field must exist but can be null, use `required` and `Json.maybe` instead:
-    
-    required "field" (Json.maybe Json.string)` (\field ->
-    
+If a field must exist but can be null, use `require` and `Decode.maybe` instead:
+
+    require "field" (Decode.maybe Decode.string) <| \field ->
+
 -}
-optional : String -> Decoder a -> (Maybe a -> Decoder b) -> Decoder b
-optional fieldName valueDecoder continuation =
+attempt : String -> Decoder a -> (Maybe a -> Decoder b) -> Decoder b
+attempt fieldName valueDecoder continuation =
     Decode.maybe (Decode.field fieldName valueDecoder)
         |> Decode.andThen continuation
 
@@ -76,8 +75,8 @@ optional fieldName valueDecoder continuation =
 {-| Decode optional nested fields.
 
 -}
-optionalAt : List String -> Decoder a -> (Maybe a -> Decoder b) -> Decoder b
-optionalAt path valueDecoder continuation =
+attemptAt : List String -> Decoder a -> (Maybe a -> Decoder b) -> Decoder b
+attemptAt path valueDecoder continuation =
     Decode.maybe (Decode.at path valueDecoder)
         |> Decode.andThen continuation
 

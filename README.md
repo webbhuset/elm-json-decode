@@ -12,7 +12,7 @@ Let's say you have a `Person` record in Elm with the following requirements:
 type alias Person =
     { id : Int -- Field is mandatory, decoder should fail if field is missing in the JSON object
     , name : String -- Field is mandatory
-    , maybeWeight : Maybe Int -- Field is optional in the JSON object
+    , maybeWeight : Maybe Int -- Field is attempt in the JSON object
     , likes : Int -- Should default to 0 if JSON field is missing or null
     , hardcoded : String -- Should be hardcoded to "Hardcoded Value" for now
     }
@@ -21,40 +21,40 @@ The approach [suggested by the core JSON library](https://package.elm-lang.org/p
 a record.
 
 ```elm
-import Json.Decode as Json exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder)
 
 person : Decoder Person
 person =
-    Json.map5 Person
-        (Json.field "id" Json.int)
-        (Json.field "name" Json.string)
-        (Json.maybe <| Json.field "weight" Json.int)
-        (Json.field "likes" Json.int
-            |> Json.maybe
-            |> Json.map (Maybe.withDefault 0)
+    Decode.map5 Person
+        (Decode.field "id" Decode.int)
+        (Decode.field "name" Decode.string)
+        (Decode.maybe <| Decode.field "weight" Decode.int)
+        (Decode.field "likes" Decode.int
+            |> Decode.maybe
+            |> Decode.map (Maybe.withDefault 0)
         )
-        (Json.succeed "Hardcoded Value")
+        (Decode.succeed "Hardcoded Value")
 ```
 
 Using this package you can write the same decoder like this:
 ```elm
-import Json.Decode as Json exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Field as Field
 
 person : Decoder Person
 person =
-    Field.required "name" Json.string (\name ->
-    Field.required "id" Json.int (\id ->
-    Field.optional "weight" Json.int (\maybeWeight ->
-    Field.optional "likes" Json.int (\maybeLikes ->
-        Json.succeed
-            { name = name
-            , id = id
-            , maybeWeight = maybeWeight
-            , likes = Maybe.withDefault 0 maybeLikes
-            , hardcoded = "Hardcoded Value"
-            }
-    ))))
+    Field.require "name" Decode.string <| \name ->
+    Field.require "id" Decode.int <| \id ->
+    Field.attempt "weight" Decode.int <| \maybeWeight ->
+    Field.attempt "likes" Decode.int <| \maybeLikes ->
+
+    Decode.succeed
+        { name = name
+        , id = id
+        , maybeWeight = maybeWeight
+        , likes = Maybe.withDefault 0 maybeLikes
+        , hardcoded = "Hardcoded Value"
+        }
 ```
 
 The main advantages over using `mapX` are:
@@ -90,19 +90,18 @@ type alias Person =
     
 person : Decoder Person
 person =
-    Field.required "firstname" Json.string (\firstname ->
-    Field.required "lastname" Json.string (\lastname ->
-    Field.required "age" Json.int (\age ->
-        Json.succeed
-            { name = firstname ++ " " ++ lastname
-            , age = age
-            }
-    )))
+    Field.require "firstname" Decode.string <| \firstname ->
+    Field.require "lastname" Decode.string <| \lastname ->
+    Field.require "age" Decode.int <| \age ->
+    Decode.succeed
+        { name = firstname ++ " " ++ lastname
+        , age = age
+        }
 ```
 
 ### Nested JSON objects
 
-Using `requiredAt` or `optionalAt` you can reach down into nested objects. This is a
+Using `requireAt` or `attemptAt` you can reach down into nested objects. This is a
 common use case when decoding graphQL responses.
 
 **JSON**
@@ -128,15 +127,14 @@ type alias BlogPost =
     
 blogpost : Decoder BlogPost
 blogpost =
-    Field.required "title" Json.string (\title ->
-    Field.requiredAt ["author", "name"] Json.string (\authorName ->
-    Field.required "content" Json.string (\content ->
-        Json.succeed
-            { title = title
-            , author = authorName
-            , content = content
-            }
-    )))
+    Field.require "title" Decode.string <| \title ->
+    Field.requireAt ["author", "name"] Decode.string <| \authorName ->
+    Field.require "content" Decode.string <| \content ->
+    Decode.succeed
+        { title = title
+        , author = authorName
+        , content = content
+        }
 ```
 
 ### Fail decoder if values are invalid
@@ -159,16 +157,16 @@ type alias Person =
     
 person : Decoder Person
 person =
-    Field.required "name" Json.string (\name ->
-    Field.required "age" Json.int (\age ->
-        if age < 18 then
-            Json.fail "You must be an adult"
-        else
-            Json.succeed
-                { name = name
-                , age = age
-                }
-    ))
+    Field.require "name" Decode.string <| \name ->
+    Field.require "age" Decode.int <| \age ->
+
+    if age < 18 then
+        Decode.fail "You must be an adult"
+    else
+        Decode.succeed
+            { name = name
+            , age = age
+            }
 ```
 
 ### Custom types
@@ -190,15 +188,15 @@ type User
 
 user : Decoder User
 user =
-    Field.optional "id" Json.int (\maybeID ->
-    Field.optional "name" Json.string (\maybeName ->
-        case (maybeID, maybeName) of
-            (Just id, Just name) ->
-                Registered id name
-                    |> Json.succeed
-            _ ->
-                Json.succeed Anonymous
-    ))
+    Field.attempt "id" Decode.int <| \maybeID ->
+    Field.attempt "name" Decode.string <| \maybeName ->
+
+    case (maybeID, maybeName) of
+        (Just id, Just name) ->
+            Registered id name
+                |> Decode.succeed
+        _ ->
+            Decode.succeed Anonymous
 ```
 
 ## How does this work?
@@ -206,7 +204,7 @@ user =
 Consider this simple example:
 
 ```elm
-import Json.Decode as Json exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder)
 
 type alias User =
     { id : Int
@@ -216,29 +214,29 @@ type alias User =
 
 user : Decoder User
 user =
-    Json.map2 User
-        (Json.field "id" Json.int)
-        (Json.field "name" Json.string)
+    Decode.map2 User
+        (Decode.field "id" Decode.int)
+        (Decode.field "name" Decode.string)
 ```
 
 Here, `map2` from [elm/json](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map2) is used to decode a JSON object to a record.
 The record constructor function is used (`User : Int -> String -> User`) to build the record.
 This means that the order fields are written in the type declaration matters. If you
 change the order of fields `id` and `name` in yor record, you have to change the order of the two 
-`(Json.field ...)` rows to match the order of the record.
+`(Decode.field ...)` rows to match the order of the record.
 
 To use named bindings instead you can use `Json.Decode.andThen` write a decoder like this:
 
 ```elm
 user : Decoder User
 user =
-    Json.field "id" Json.int
-        |> Json.andThen
+    Decode.field "id" Decode.int
+        |> Decode.andThen
             (\id ->
-                Json.field "name" Json.string
-                    |> Json.andThen
+                Decode.field "name" Decode.string
+                    |> Decode.andThen
                         (\name ->
-                            Json.succeed
+                            Decode.succeed
                                 { id = id
                                 , name = name
                                 }
@@ -252,16 +250,16 @@ The fields are decoded one at the time and then the decoded value is bound to a
 contiunation function using `andThen`. The innermost function will have access to
 all the named argument variables from the outer scopes.
 
-The above code can be improved by using the helper function `required`. This is
+The above code can be improved by using the helper function `require`. This is
 the same decoder expressed in a cleaner way:
 
 ```elm
-module Json.Decode.Field exposing (required)
+module Json.Decode.Field exposing (require)
 
-required : String -> Decoder a -> (a -> Decoder b) -> Decoder b
-required fieldName valueDecoder continuation =
-    Json.field fieldName valueDecoder
-        |> Json.andThen continuation
+require : String -> Decoder a -> (a -> Decoder b) -> Decoder b
+require fieldName valueDecoder continuation =
+    Decode.field fieldName valueDecoder
+        |> Decode.andThen continuation
 
 -- In User.elm
 module User exposing (user)
@@ -270,11 +268,11 @@ import Json.Decode.Field as Field
 
 user : Decoder User
 user =
-    Field.required "id" Json.int
+    Field.require "id" Decode.int
         (\id ->
-            Field.required "name" Json.string
+            Field.require "name" Decode.string
                 (\name ->
-                    Json.succeed
+                    Decode.succeed
                         { id = id
                         , name = name
                         }
@@ -283,24 +281,46 @@ user =
 ```
 Now we got rid of some `andThen` noise.
 
-Finally, if you format the code like this it gets even more clear
-what is going on:
+Now let's format the code in a more readable way.
 
 ```elm
 user : Decoder User
 user =
-    Field.required "id" Json.int (\id ->
-    Field.required "name" Json.string (\name ->
-        Json.succeed
+    Field.require "id" Decode.int (\id ->
+    Field.require "name" Decode.string (\name ->
+
+        Decode.succeed
             { id = id
             , name = name
             }
     ))
 ```
-This reads quite nice.
 
-* First you extract everything you need from the JSON object and
+You can also get rid of the parenthesis by using the backwards
+[function application operator](https://package.elm-lang.org/packages/elm/core/latest/Basics#(<|)) (`<|`).
+
+```elm
+user : Decoder User
+user =
+    Field.require "id" Decode.int <| \id ->
+    Field.require "name" Decode.string <| \name ->
+
+    Decode.succeed
+        { id = id
+        , name = name
+        }
+```
+
+This reads quite nice. It's like two paragraphs.
+
+* In the first paragraph you extract everything you need from the JSON object and
 bind each field to a variable. Keeping the field decoder and the variable on the same row makes it
 easy to read.
-* Then you build the record using all collected values.
+* Then in the second paragraph you build the Elm type using all collected values.
 
+It kind of maps to natural language:
+
+`require` a `Field` called `"id"` and `Decode` an `int`, bind the result to `id`
+`require` a `Field` called `"name"` and `Decode` a `string`, bind the result to `name`
+
+The `Decode` will `succeed` with `{name = name, email = email}`
