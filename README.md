@@ -93,6 +93,7 @@ person =
     Field.require "firstname" Decode.string <| \firstname ->
     Field.require "lastname" Decode.string <| \lastname ->
     Field.require "age" Decode.int <| \age ->
+    
     Decode.succeed
         { name = firstname ++ " " ++ lastname
         , age = age
@@ -130,6 +131,7 @@ blogpost =
     Field.require "title" Decode.string <| \title ->
     Field.requireAt ["author", "name"] Decode.string <| \authorName ->
     Field.require "content" Decode.string <| \content ->
+    
     Decode.succeed
         { title = title
         , author = authorName
@@ -320,7 +322,7 @@ easy to read.
 
 It kind of maps to natural language:
 
-`require` a `Field` called `"id"` and `Decode` an `int`, bind the result to `id`
-`require` a `Field` called `"name"` and `Decode` a `string`, bind the result to `name`
-
-The `Decode` will `succeed` with `{name = name, email = email}`
+> `require` a `Field` called `"id"` and `Decode` an `int`, bind the result to `id`\
+> `require` a `Field` called `"name"` and `Decode` a `string`, bind the result to `name`
+>
+> The `Decode` will `succeed` with `{name = name, email = email}`
