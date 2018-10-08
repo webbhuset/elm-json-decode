@@ -1,4 +1,4 @@
-module Json.Decode.Field exposing (require, requireAt, attemt, attemtAt)
+module Json.Decode.Field exposing (require, requireAt, attempt, attemptAt)
 
 {-| Decode with continuation
 
