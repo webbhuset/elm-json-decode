@@ -4,7 +4,16 @@ This packages helps you writing JSON decoders in a [Continuation-passing](https:
 This enables you use named bindings for field names which is very useful when
 decoding JSON objects to Elm records or custom types.
 
-## Example
+
+* [Introduction](#introduction)
+* [Examples](#examples)
+    * [Combine Fields](#combine-fields)
+    * [Nested JSON Objects](#nested-json-objects)
+    * [Fail decoder if values are invalid](#fail-decoder-if-values-are-invalid)
+    * [Decode custom types](#decode-custom-types)
+* [How does this work](#how-does-this-work)
+
+## Introduction
 
 Let's say you have a `Person` record in Elm with the following requirements:
 
@@ -66,7 +75,7 @@ The main advantages over using `mapX` are:
 * Sometimes fields needs futher validation / processing. See below examples.
 * If you have more than 8 fields in your object you can't use the `Json.Decode.mapX` approach since [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
 
-## More Examples
+## Examples
 
 ### Combine fields
 
@@ -171,7 +180,7 @@ person =
             }
 ```
 
-### Custom types
+### Decode custom types
 
 You can also use this package to build decoders for custom types.
 
@@ -202,6 +211,15 @@ user =
 ```
 
 ## How does this work?
+
+The following documentation assumes you are familiar with the following functions:
+
+1. `Json.Decode.field`
+2. `Json.Decode.map`
+3. `Json.Decode.andThen`
+4. Function application operator (`<|`)
+
+You can read more about those [here](https://github.com/webbhuset/elm-json-decode/blob/master/TEACHING.md).
 
 Consider this simple example:
 

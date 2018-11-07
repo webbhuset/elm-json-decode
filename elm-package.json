@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "summary": "Write nice JSON decodes using a continuation-style.",
+    "summary": "Write nice JSON decodes using a continuation-style. Useful when decoding JSON objects.",
     "repository": "https://github.com/webbhuset/elm-json-decode.git",
     "license": "MIT",
     "source-directories": [
