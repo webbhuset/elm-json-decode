@@ -26,7 +26,7 @@ type alias Person =
     , hardcoded : String -- Should be hardcoded to "Hardcoded Value" for now
     }
 ```
-The approach [suggested by the core JSON library](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map3) is to use the `Json.Decode.mapX` family of decoders to build
+The approach [suggested by the core JSON library](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map3) is to use the `Json.Decode.mapN` family of decoders to build
 a record.
 
 ```elm
@@ -46,6 +46,7 @@ person =
 ```
 
 Using this package you can write the same decoder like this:
+
 ```elm
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Field as Field
@@ -66,14 +67,14 @@ person =
         }
 ```
 
-The main advantages over using `mapX` are:
+The main advantages over using `mapN` are:
 
 * Record field order does not matter. Named bindings are used instead of order. You can change the order of the fields in the type declaration (`type alias Person ...`) without breaking the decoder.
 * Easier to see how the record is connected to the JSON object. Especially when there are many fields. Sometimes the JSON fields have different names than your Elm record.
 * Easier to add fields down the line.
-* If all fields of the record are of the same type you won't get any compiler error with the `mapX` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
+* If all fields of the record are of the same type you won't get any compiler error with the `mapN` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
 * Sometimes fields needs futher validation / processing. See below examples.
-* If you have more than 8 fields in your object you can't use the `Json.Decode.mapX` approach since [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
+* If you have more than 8 fields in your object you can't use the `Json.Decode.mapN` approach since [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
 
 ## Examples
 
@@ -214,10 +215,10 @@ user =
 
 The following documentation assumes you are familiar with the following functions:
 
-1. `Json.Decode.field`
-2. `Json.Decode.map`
-3. `Json.Decode.andThen`
-4. Function application operator (`<|`)
+1. [Json.Decode.field](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#field)
+2. [Json.Decode.map](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map)
+3. [Json.Decode.andThen](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#andThen)
+4. Function application operator [<|](https://package.elm-lang.org/packages/elm/core/latest/Basics#(<|))
 
 You can read more about those [here](https://github.com/webbhuset/elm-json-decode/blob/master/TEACHING.md).
 

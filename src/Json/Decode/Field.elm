@@ -12,13 +12,10 @@ In that case there are two possible solutions:
 2. Deal with the missing value situation, either by defaulting to some value or by
    using a `Maybe` value
 
-In this module these two options are represented by `requre` and
+In this module these two options are represented by `require` and
 `attempt`.
 
-* `requre` will fail if:
-    - It was not run on an object.
-    - The field was missing.
-    - The field's value could not be decoded.
+* `require` can fail if the decoding can not be completed.
 * `attempt` will never fail. It always decodes to a `Maybe` value.
 
 @docs require, requireAt, attempt, attemptAt
@@ -28,8 +25,9 @@ In this module these two options are represented by `requre` and
 import Json.Decode as Decode exposing (Decoder)
 
 
-{-| Decode required fields. The decoder will fail if the field
-is missing or its value can not be decoded.
+{-| Decode required fields.
+
+Example:
 
     user : Decoder User
     user =
@@ -40,6 +38,15 @@ is missing or its value can not be decoded.
             { id = id
             , name = name
             }
+
+In this example the decoder will fail if:
+
+* The JSON value is not an object.
+* Any of the fields `"id"` or `"name"` are missing. If the object contains other fields
+  they are ignored and will not cause the decoder to fail.
+* The value of field `"id"` is not an `Int`.
+* The value of field `"name"` is not a `String`.
+
 -}
 require : String -> Decoder a -> (a -> Decoder b) -> Decoder b
 require fieldName valueDecoder continuation =
@@ -47,7 +54,7 @@ require fieldName valueDecoder continuation =
         |> Decode.andThen continuation
 
 
-{-| Decode nested fields. Works the same as `requre` but on nested fieds.
+{-| Decode nested fields. Works the same as `require` but on nested fieds.
 
     blogPost : Decoder BlogPost
     blogPost =
@@ -71,8 +78,7 @@ requireAt path valueDecoder continuation =
 
 Always decodes to a `Maybe` value and never fails.
 
-The decoder will not fail if the field is missing or its value can no be
-decoded. The decoded value will be `Nothing` in that case.
+Example:
 
     person : Decoder Person
     person =
@@ -84,6 +90,13 @@ decoded. The decoded value will be `Nothing` in that case.
             , weight = maybeWeight
             }
 
+In this example the `maybeWeight` value will be `Nothing` if:
+
+* The JSON value was not an object
+* The `weight` field is missing.
+* The `weight` field is not an `Int`.
+
+In this case there is no difference between a field being `null` or missing.
 If a field must exist but can be null, use `require` and `Decode.maybe` instead:
 
     require "field" (Decode.maybe Decode.string) <| \field ->
