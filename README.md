@@ -69,12 +69,19 @@ person =
 
 The main advantages over using `mapN` are:
 
-* Record field order does not matter. Named bindings are used instead of field order. You can change the order of the fields in the type declaration (`type alias Person ...`) without breaking the decoder.
-* Easier to see how the record is connected to the JSON object - especially when there are many fields. Sometimes the JSON fields have different names than your Elm record.
+* Record field order does not matter. Named bindings are used instead of field order.
+  You can change the order of the fields in the type declaration (`type alias Person ...`) without breaking the decoder.
+* Easier to see how the record is connected to the JSON object - especially when there are many fields.
+  Sometimes the JSON fields have different names than your Elm record.
 * Easier to add fields down the line.
-* With the `mapN` approach, if all fields of the record are of the same type and you mess up the field order, you won't get any compiler error. Things will appear OK but field values will be transposed. Since this package uses named bindings it is much easier to get things right.
+* With the `mapN` approach, if all fields of the record are of the same type and you mess up the field order, you
+  won't get any compiler error. Things will appear OK but field values will be transposed.
+  Since this package uses named bindings it is much easier to get things right.
 * Sometimes fields needs futher validation / processing. See below examples.
-* If you have more than 8 fields in your object you can't use the `Json.Decode.mapN` approach since [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
+* If you have more than 8 fields in your object you can't use the `Json.Decode.mapN` approach since
+  [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
+
+This kind of resembles the `do` notation syntax found in Haskell or Pure Script.
 
 ## Examples
 
@@ -218,9 +225,10 @@ The following documentation assumes you are familiar with the following function
 1. [Json.Decode.field](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#field)
 2. [Json.Decode.map](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map)
 3. [Json.Decode.andThen](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#andThen)
-4. Function application operator [<|](https://package.elm-lang.org/packages/elm/core/latest/Basics#(<|))
+4. Function application operator ([<|](https://package.elm-lang.org/packages/elm/core/latest/Basics#(<|))
 
-You can read more about those [here](https://github.com/webbhuset/elm-json-decode/blob/master/TEACHING.md).
+You can read more about those [this guide](https://github.com/webbhuset/elm-json-decode/blob/master/TEACHING.md) by
+Richard Feldman.
 
 Consider this simple example:
 
@@ -302,7 +310,7 @@ user =
 ```
 Nice: we got rid of some `andThen` noise.
 
-Now let's format the code in a more readable way.
+Now let's format the code in a more readable way:
 
 ```elm
 user : Decoder User
@@ -310,10 +318,10 @@ user =
     Field.require "id" Decode.int (\id ->
     Field.require "name" Decode.string (\name ->
 
-        Decode.succeed
-            { id = id
-            , name = name
-            }
+    Decode.succeed
+        { id = id
+        , name = name
+        }
     ))
 ```
 
@@ -345,3 +353,19 @@ It kind of maps to natural language:
 > `require` a `Field` called `"name"` and `Decode` a `string`, bind the result to `name`
 >
 > The `Decode` will `succeed` with `{name = name, email = email}`
+
+
+This way of formatting the code kind of resembles the `do` notation syntax found in Haskell or Pure Script.
+
+```haskell
+user : Decoder User
+user = do
+    id <- Field.require "id" Decode.int
+    name <- Field.require "name" Decode.string
+
+    return
+        { id = id
+        , name = name
+        }
+```
+
