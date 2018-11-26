@@ -1,7 +1,7 @@
 # Continuation-passing style JSON decoder in Elm
 
 This packages helps you writing JSON decoders in a [Continuation-passing](https://en.wikipedia.org/wiki/Continuation-passing_style) style.
-This enables you use named bindings for field names which is very useful when
+This enables you to use named bindings for field names which is very useful when
 decoding JSON objects to Elm records or custom types.
 
 
@@ -11,7 +11,7 @@ decoding JSON objects to Elm records or custom types.
     * [Nested JSON Objects](#nested-json-objects)
     * [Fail decoder if values are invalid](#fail-decoder-if-values-are-invalid)
     * [Decode custom types](#decode-custom-types)
-* [How does this work](#how-does-this-work)
+* [How does this work?](#how-does-this-work)
 
 ## Introduction
 
@@ -21,7 +21,7 @@ Let's say you have a `Person` record in Elm with the following requirements:
 type alias Person =
     { id : Int -- Field is mandatory, decoder should fail if field is missing in the JSON object
     , name : String -- Field is mandatory
-    , maybeWeight : Maybe Int -- Field is attempt in the JSON object
+    , maybeWeight : Maybe Int -- Field is optional in the JSON object
     , likes : Int -- Should default to 0 if JSON field is missing or null
     , hardcoded : String -- Should be hardcoded to "Hardcoded Value" for now
     }
@@ -69,10 +69,10 @@ person =
 
 The main advantages over using `mapN` are:
 
-* Record field order does not matter. Named bindings are used instead of order. You can change the order of the fields in the type declaration (`type alias Person ...`) without breaking the decoder.
-* Easier to see how the record is connected to the JSON object. Especially when there are many fields. Sometimes the JSON fields have different names than your Elm record.
+* Record field order does not matter. Named bindings are used instead of field order. You can change the order of the fields in the type declaration (`type alias Person ...`) without breaking the decoder.
+* Easier to see how the record is connected to the JSON object - especially when there are many fields. Sometimes the JSON fields have different names than your Elm record.
 * Easier to add fields down the line.
-* If all fields of the record are of the same type you won't get any compiler error with the `mapN` approach if you mess up the order. Since named binding is used here it makes it much easier to get things right.
+* With the `mapN` approach, if all fields of the record are of the same type and you mess up the field order, you won't get any compiler error. Things will appear OK but field values will be transposed. Since this package uses named bindings it is much easier to get things right.
 * Sometimes fields needs futher validation / processing. See below examples.
 * If you have more than 8 fields in your object you can't use the `Json.Decode.mapN` approach since [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
 
@@ -112,7 +112,7 @@ person =
 
 ### Nested JSON objects
 
-Using `requireAt` or `attemptAt` you can reach down into nested objects. This is a
+Using `requireAt` or `attemptAt` lets you reach down into nested objects. This is a
 common use case when decoding graphQL responses.
 
 **JSON**
@@ -151,7 +151,7 @@ blogpost =
 
 ### Fail decoder if values are invalid
 
-Here, the decoder should fail if the person is below 18.
+Here the decoder should fail if the person is younger than 18 yers old.
 
 **JSON**
 ```json
@@ -242,8 +242,8 @@ user =
 
 Here, `map2` from [elm/json](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map2) is used to decode a JSON object to a record.
 The record constructor function is used (`User : Int -> String -> User`) to build the record.
-This means that the order fields are written in the type declaration matters. If you
-change the order of fields `id` and `name` in yor record, you have to change the order of the two 
+This means that the order in which fields are written in the type declaration matters. For example, if you
+change the order of fields `id` and `name` in yor record, you must also change the order of the two 
 `(Decode.field ...)` rows to match the order of the record.
 
 To use named bindings instead you can use `Json.Decode.andThen` write a decoder like this:
@@ -264,14 +264,14 @@ user =
                         )
             )
 ```
-Now this looks ridicolus, but one thing is interesting: The record is
+Now this looks ridiculous, but one thing is interesting: The record is
 constructed using named variables (in the innermost function).
 
-The fields are decoded one at the time and then the decoded value is bound to a
-contiunation function using `andThen`. The innermost function will have access to
+The fields are decoded one at the time with each decoded value being bound in turn to a
+continuation function using `andThen`. The innermost function has access to
 all the named argument variables from the outer scopes.
 
-The above code can be improved by using the helper function `require`. This is
+The above code can be improved by using the helper function `require`. Here is
 the same decoder expressed in a cleaner way:
 
 ```elm
@@ -300,7 +300,7 @@ user =
                 )
         )
 ```
-Now we got rid of some `andThen` noise.
+Nice: we got rid of some `andThen` noise.
 
 Now let's format the code in a more readable way.
 
@@ -317,7 +317,7 @@ user =
     ))
 ```
 
-You can also get rid of the parenthesis by using the backwards
+We can also eliminate the parenthesis by using the backwards
 [function application operator](https://package.elm-lang.org/packages/elm/core/latest/Basics#(<|)) (`<|`).
 
 ```elm
@@ -332,12 +332,12 @@ user =
         }
 ```
 
-This reads quite nice. It's like two paragraphs.
+This reads quite nicely. It's like two paragraphs.
 
-* In the first paragraph you extract everything you need from the JSON object and
-bind each field to a variable. Keeping the field decoder and the variable on the same row makes it
+* In the first paragraph we extract everything we need from the JSON object and
+bind each value to a variable. Keeping the field decoder and the variable on the same row makes it
 easy to read.
-* Then in the second paragraph you build the Elm type using all collected values.
+* In the second paragraph we build the actual Elm type using all the collected values.
 
 It kind of maps to natural language:
 
