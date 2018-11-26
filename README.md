@@ -81,8 +81,6 @@ The main advantages over using `mapN` are:
 * If you have more than 8 fields in your object you can't use the `Json.Decode.mapN` approach since
   [map8](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#map8) is the largest map function.
 
-This kind of resembles the `do` notation syntax found in Haskell or Pure Script.
-
 ## Examples
 
 ### Combine fields
