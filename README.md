@@ -350,7 +350,7 @@ It kind of maps to natural language:
 > `require` a `Field` called `"id"` and `Decode` an `int`, bind the result to `id`\
 > `require` a `Field` called `"name"` and `Decode` a `string`, bind the result to `name`
 >
-> The `Decode` will `succeed` with `{name = name, email = email}`
+> The `Decode` will `succeed` with `{id = id, name = name}`
 
 
 This way of formatting the code kind of resembles the `do` notation syntax found in Haskell or Pure Script.
