@@ -1,12 +1,12 @@
-module Json.Decode.Optional exposing
-    ( OptionalDecoder, at, return
+module Json.Decode.Flags exposing
+    ( FlagsDecoder, at, return
     , Error, decodeString, decodeValue
     )
 
 {-|
 
 
-# Optional decoder
+# Flags decoder
 
 This module helps you create a Json Decoder that will never fail.
 This is useful when you want to decode a record but not
@@ -62,12 +62,12 @@ and a list of `Error`:
 ]
 ```
 
-## Create an Optional Decoder
+## Create a Flags Decoder
 
-@docs OptionalDecoder, at, return
+@docs FlagsDecoder, at, return
 
 
-## Run OptionalDecoder
+## Run FlagsDecoder
 
 @docs Error, decodeString, decodeValue
 
@@ -82,8 +82,8 @@ type alias JsonDecoder a =
 
 {-| A decoder that never fails.
 -}
-type OptionalDecoder a
-    = OptionalDecoder (JsonDecoder ( List Error, a ))
+type FlagsDecoder a
+    = FlagsDecoder (JsonDecoder ( List Error, a ))
 
 
 {-| A decode error.
@@ -102,7 +102,7 @@ type alias TestRecord =
 
 test =
     let
-        decoder : OptionalDecoder TestRecord
+        decoder : FlagsDecoder TestRecord
         decoder =
             at ["field1"] Decode.string "Default 1" <| \value1 ->
             at ["field2"] Decode.string "Default 2" <| \value2 ->
@@ -132,7 +132,7 @@ test =
         , field2 = value2
         }
 -}
-at : List String -> JsonDecoder a -> a -> (a -> OptionalDecoder b) -> OptionalDecoder b
+at : List String -> JsonDecoder a -> a -> (a -> FlagsDecoder b) -> FlagsDecoder b
 at path decoder defaultValue continuation =
     Decode.value
         |> Decode.andThen
@@ -144,14 +144,14 @@ at path decoder defaultValue continuation =
                 case Decode.decodeValue fieldDecoder jsonValue of
                     Ok value ->
                         let
-                            (OptionalDecoder result) =
+                            (FlagsDecoder result) =
                                 continuation value
                         in
                         result
 
                     Err decodeError ->
                         let
-                            (OptionalDecoder result) =
+                            (FlagsDecoder result) =
                                 continuation defaultValue
                         in
                         result
@@ -165,41 +165,41 @@ at path decoder defaultValue continuation =
                                     )
                                 )
             )
-        |> OptionalDecoder
+        |> FlagsDecoder
 
 
 {-| Return a value from your decoder.
 -}
-return : a -> OptionalDecoder a
+return : a -> FlagsDecoder a
 return arg =
     Decode.succeed
         ( []
         , arg
         )
-        |> OptionalDecoder
+        |> FlagsDecoder
 
 
 {-| Decode a json string
 -}
-decodeString : OptionalDecoder a -> String -> ( List Error, a )
-decodeString (OptionalDecoder decoder) value =
+decodeString : FlagsDecoder a -> String -> ( List Error, a )
+decodeString (FlagsDecoder decoder) value =
     case Decode.decodeString decoder value of
         Ok v ->
             v
 
         Err e ->
             -- This decoder can never fail so this will never happen (hopefully).
-            decodeString (OptionalDecoder decoder) value
+            decodeString (FlagsDecoder decoder) value
 
 
 {-| Decode a Json value
 -}
-decodeValue : OptionalDecoder a -> Decode.Value -> ( List Error, a )
-decodeValue (OptionalDecoder decoder) value =
+decodeValue : FlagsDecoder a -> Decode.Value -> ( List Error, a )
+decodeValue (FlagsDecoder decoder) value =
     case Decode.decodeValue decoder value of
         Ok v ->
             v
 
         Err e ->
             -- This decoder can never fail so this will never happen (I hope).
-            decodeValue (OptionalDecoder decoder) value
+            decodeValue (FlagsDecoder decoder) value
