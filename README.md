@@ -225,7 +225,7 @@ The following documentation assumes you are familiar with the following function
 3. [Json.Decode.andThen](https://package.elm-lang.org/packages/elm/json/latest/Json-Decode#andThen)
 4. Function application operator ([<|](https://package.elm-lang.org/packages/elm/core/latest/Basics#(<|)))
 
-You can read more about those [this guide](https://github.com/webbhuset/elm-json-decode/blob/master/TEACHING.md) by
+You can read more about those in [this guide](https://github.com/webbhuset/elm-json-decode/blob/master/TEACHING.md) by
 Richard Feldman.
 
 Consider this simple example:
